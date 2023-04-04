@@ -50,7 +50,7 @@ SET schema 'hr'; # переключился на схему 'hr' БД sample_box
 select * from projects limit 10;
 ```
 
-![](hr-projects-select.png)
+![](assets/hr-projects-select.png)
 
 >Пункты 1.1 и 1.2 выполняются в командной строке, пункты 1.3 и 1.4 выполняются в интерактивном режиме.
 
