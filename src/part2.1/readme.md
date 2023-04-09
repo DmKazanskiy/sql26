@@ -91,20 +91,20 @@ create or replace function employee_salary_history_add() returns trigger as
 $$
   declare
 	employee_id int4 = (select(coalesce(new.emp_id, 0.00)));
-    salary_old numeric = 0.00;
-    salary_new numeric = (select(coalesce(new.salary, 0.00)));
+    salary_last numeric;
+    salary_next numeric = (select(coalesce(new.salary, 0.00)));
   begin
     if TG_OP = 'INSERT' then
-	  salary_old = (select coalesce((select salary from employee_salary
-	    where emp_id = new.emp_id and effective_from <= new.effective_from
-	    order by effective_from desc, salary desc
-	    limit 1 offset 1),0.00)
+	  salary_last = (select coalesce((select salary_new from employee_salary_history
+	    where emp_id = new.emp_id
+	    order by last_update desc, salary_old desc
+	    limit 1),0.00)
       );
     elseif TG_OP = 'UPDATE' then
-  	  salary_old = old.salary;
+  	  salary_last = old.salary;
     end if;  
   	insert into employee_salary_history(emp_id, salary_old, salary_new, last_update) values
-	  (employee_id, salary_old, salary_new, now());  	
+	  (employee_id, salary_last, salary_next, now());  	
     return null;
   end   
 $$ language plpgsql;
@@ -146,10 +146,10 @@ insert into employee_salary(order_id, emp_id, salary, effective_from) values
 **employee_salary_history(after)**
 |emp_id|salary_old|salary_new|difference|last_update|
 |---|---|---|---|---|
-|11|9893.00| |19893.00|10000.00|2023-04-07 16:09:23.622|
-|11|12366.00|10366.00|-2000.00|2023-04-07 16:09:23.622|
+|11|0.00|19893.00|10000.00|2023-04-07 16:09:23.622|
+|11|19893.00|10366.00|-9527.00|2023-04-07 16:09:23.622|
 |8|0.00|3000.00|3000.00|2023-04-07 16:09:23.622|
-|8|9826.00|19826.00|10000.00|2023-04-07 16:09:23.622|
+|8|3000.00|19826.00|16826.00|2023-04-07 16:09:23.622|
 
 **Проверка UPDATE:**
 ```sql
@@ -175,7 +175,7 @@ update employee_salary
 **employee_salary_history(before)**
 |emp_id|salary_old|salary_new|difference|last_update|
 |---|---|---|---|---|
-|11|9893.00| |19893.00|10000.00|2023-04-07 16:09:23.622|
+|11|9893.00|19893.00|10000.00|2023-04-07 16:09:23.622|
 |11|12366.00|10366.00|-2000.00|2023-04-07 16:09:23.622|
 |8|0.00|3000.00|3000.00|2023-04-07 16:09:23.622|
 |8|9826.00|19826.00|10000.00|2023-04-07 16:09:23.622|
@@ -196,7 +196,7 @@ update employee_salary
 **employee_salary_history(after)**
 |emp_id|salary_old|salary_new|difference|last_update|
 |---|---|---|---|---|
-|11|9893.00| |19893.00|10000.00|2023-04-07 16:09:23.622|
+|11|9893.00| 19893.00|10000.00|2023-04-07 16:09:23.622|
 |11|12366.00|10366.00|-2000.00|2023-04-07 16:09:23.622|
 |8|0.00|3000.00|3000.00|2023-04-07 16:09:23.622|
 |8|9826.00|19826.00|10000.00|2023-04-07 16:09:23.622| 

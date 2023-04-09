@@ -44,6 +44,12 @@ select vacancies_cnt('стажер', '2016-02-03', null);
 -- 	которого нет в таблице-справочнике grade_salary. 
 -- 	Триггер должен возвращать предупреждение пользователю о 
 -- 	несуществующем значении grade.
+--- === Замечание по 2 заданию:
+---  Уберите из запроса все лишнее, что сделали просто так и не используете.
+---  Если грейд существует, то нужно не мешать работе оператора и передать ему данные для работы.
+--- --
+--- Исправил.
+
 
 create or replace function grade_warning() returns trigger as 
 $$
@@ -52,8 +58,6 @@ $$
   begin
     if not exists (select * from grade_salary where grade = new.grade)
 	  then raise warning 'exception: grade value % is not exist in grade_salary table', new.grade;
-	else
-	  raise warning 'success: grade value % exist in grade_salary table', new.grade;
 	end if;
 	return null;
   end
@@ -94,25 +98,32 @@ comment on column employee_salary_history.last_update is 'текущая дат�
 -- 	новой записи о сотруднике или при обновлении значения salary в 
 -- 	таблице employee_salary, и заполняет 
 -- 	таблицу employee_salary_history данными.
+--- === Замечание: По 3 заданию:
+---  Задавать идентификатору значение 0, если он отсутствует, не имеет смысла.
+---  В salary_old нужно получать предыдущее значение оклада, а не с шагом 2. 
+---  В условии пишите, что нужно проигнорировать новую запись, а потом в offset 
+---  убрать предыдущее значение и работать с окладом через один от предыдущего.
+--- ---
+---  При выполнении INSERT поиск предыдущего 
 
 create or replace function employee_salary_history_add() returns trigger as 
 $$
   declare
-	employee_id int4 = (select(coalesce(new.emp_id, 0.00)));
-    salary_old numeric = 0.00;
-    salary_new numeric = (select(coalesce(new.salary, 0.00)));
+  employee_id int4 = (select(coalesce(new.emp_id, 0.00)));
+    salary_last numeric;
+    salary_next numeric = (select(coalesce(new.salary, 0.00)));
   begin
     if TG_OP = 'INSERT' then
-	  salary_old = (select coalesce((select salary from employee_salary
-	    where emp_id = new.emp_id and effective_from <= new.effective_from
-	    order by effective_from desc, salary desc
-	    limit 1 offset 1),0.00)
+    salary_last = (select coalesce((select salary_new from employee_salary_history
+      where emp_id = new.emp_id
+      order by last_update desc, salary_old desc
+      limit 1),0.00)
       );
     elseif TG_OP = 'UPDATE' then
-  	  salary_old = old.salary;
+      salary_last = old.salary;
     end if;  
-  	insert into employee_salary_history(emp_id, salary_old, salary_new, last_update) values
-	  (employee_id, salary_old, salary_new, now());  	
+    insert into employee_salary_history(emp_id, salary_old, salary_new, last_update) values
+    (employee_id, salary_last, salary_next, now());   
     return null;
   end   
 $$ language plpgsql;
@@ -131,10 +142,10 @@ insert into employee_salary(order_id, emp_id, salary, effective_from) values
 
 -- === employee_salary(before) ===
 -- order_id	emp_id	salary		effective_from
--- 25024	11		9893.00		2014-06-10
--- 25023	11		12366.00	2016-01-01
--- 25017	8		9826.00		2018-09-17
--- 25016	8		12130.00	2020-01-01
+-- 25024	 11		    9893.00		2014-06-10
+-- 25023	 11		    12366.00	2016-01-01
+-- 25017	 8		   9826.00		2018-09-17
+-- 25016	 8		   12130.00	  2020-01-01
 --
 -- === employee_salary(after) ===
 -- 25024	11	9893.00		2014-06-10
@@ -148,10 +159,10 @@ insert into employee_salary(order_id, emp_id, salary, effective_from) values
 --
 -- === employee_salary_history(after) ===
 -- emp_id	salary_old	salary_new	difference	last_update
--- 11		9893.00	 	19893.00	10000.00	2023-04-07 16:09:23.622
--- 11		12366.00	10366.00	-2000.00	2023-04-07 16:09:23.622
--- 8		0.00		3000.00		3000.00		2023-04-07 16:09:23.622
--- 8		9826.00		19826.00	10000.00	2023-04-07 16:09:23.622
+-- 11		0.00	 	19893.00	19893.00	2023-04-09 16:09:23.622
+-- 11		19893.00	10366.00	-9527.00	2023-04-09 16:09:23.622
+-- 8		0.00		3000.00		3000.00		2023-04-09 16:09:23.622
+-- 8		3000.00		19826.00	16826.00	2023-04-09 16:09:23.622
 
 -- проверка UPDATE
 update employee_salary
