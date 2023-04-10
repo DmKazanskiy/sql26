@@ -43,10 +43,11 @@ $$
   begin
     if not exists (select * from grade_salary where grade = new.grade)
 	  then raise warning 'exception: grade value % is not exist in grade_salary table', new.grade;
+	  return null;
 	else
 	  raise warning 'success: grade value % exist in grade_salary table', new.grade;
+	  return new;
 	end if;
-	return null;
   end
 $$ language plpgsql;
 create or replace trigger position_grade_check
@@ -55,7 +56,7 @@ for each row execute function grade_warning();
 
 -- проверка:
 INSERT INTO hr."position" (pos_id,pos_title,pos_category,unit_id,grade,address_id,manager_pos_id) VALUES
-	 (4611,'QA-инженер','',204,3,20,4568), -- success: grade value 3 exist in grade_salary table
+	 (4611,'QA-инженер','',204,3,20,4568), -- row add to position
 	 (4612,'QA-инженер','',204,8,20,4568), -- exception: grade value 8 is not exist in grade_salary table
 	 (4613,'QA-инженер','',204,null,20,4568); -- exception: grade value <NULL> is not exist in grade_salary table
 	 

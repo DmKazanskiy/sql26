@@ -49,27 +49,35 @@ select vacancies_cnt('стажер', '2016-02-03', null);
 ---  Если грейд существует, то нужно не мешать работе оператора и передать ему данные для работы.
 --- --
 --- Исправил.
-
+---- === Замечание по 2 заданию:
+----  Если грейд существует, то нужно не мешать работе оператора и 
+----  передать ему данные для работы. 
+----  Разберитесь, что возвращает функция и с чем работать оператору.
+---- --
+---- Исправлено:
+----   если grade не существует или null, то выводим предупреждение (return null;)
+----   если grade существует, то добавляем в таблицу position (return new;)
+----   триггер сработает только для insert
 
 create or replace function grade_warning() returns trigger as 
 $$
-  declare
-    grade_id int4 = 1;
   begin
-    if not exists (select * from grade_salary where grade = new.grade)
-	  then raise warning 'exception: grade value % is not exist in grade_salary table', new.grade;
-	end if;
-	return null;
+   if not exists (select * from grade_salary where grade = new.grade)
+    then raise warning 'exception: grade value % is not exist in grade_salary table', new.grade;
+      return null;
+    else
+      return new;
+	  end if;
   end
 $$ language plpgsql;
 create or replace trigger position_grade_check
-before insert or update on "position"
+before insert on "position"
 for each row execute function grade_warning();
 
 -- проверка:
 
 INSERT INTO hr."position" (pos_id,pos_title,pos_category,unit_id,grade,address_id,manager_pos_id) VALUES
-	 (4611,'QA-инженер','',204,3,20,4568), -- success: grade value 3 exist in grade_salary table
+	 (4611,'QA-инженер','',204,3,20,4568), -- row add to position
 	 (4612,'QA-инженер','',204,8,20,4568), -- exception: grade value 8 is not exist in grade_salary table
 	 (4613,'QA-инженер','',204,null,20,4568); -- exception: grade value <NULL> is not exist in grade_salary table
 
