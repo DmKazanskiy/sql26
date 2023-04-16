@@ -67,7 +67,7 @@ $$
       return null;
     else
       return new;
-	  end if;
+    end if;
   end
 $$ language plpgsql;
 create or replace trigger position_grade_check
