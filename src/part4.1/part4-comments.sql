@@ -39,7 +39,7 @@ COMMENT ON COLUMN stores.address_id IS E'ID Адреса склада';
 COMMENT ON COLUMN stores.capacity IS E'Вместимость склада в куб.м.';
 
 COMMENT ON TABLE customers IS E'Клиенты';
-COMMENT ON COLUMN customers.customers_id IS E'ID клиента';
+COMMENT ON COLUMN customers.customer_id IS E'ID клиента';
 COMMENT ON COLUMN customers.address_id IS E'ID Адреса клиента';
 COMMENT ON COLUMN customers.nickname IS E'ФИО клиента';
 COMMENT ON COLUMN customers.phone IS E'Телефон клиента для связи';
@@ -67,18 +67,33 @@ COMMENT ON COLUMN products.product_type IS E'Тип товара';
 
 COMMENT ON TABLE supplies IS E'Поставки товаров';
 COMMENT ON COLUMN supplies.supply_id IS E'ID поставки';
-COMMENT ON COLUMN supplies.product_id IS E'ID товара';
 COMMENT ON COLUMN supplies.partner_id IS E'ID партнера-поставщика';
-COMMENT ON COLUMN supplies.quantity IS E'Количество';
 COMMENT ON COLUMN supplies.store_id IS E'Идентификатор склада';
-COMMENT ON COLUMN supplies.capacity IS E'Объем товара, куб.м.';
+COMMENT ON COLUMN supplies.capacity IS E'Общий объем товара, куб.м.';
 COMMENT ON COLUMN supplies.date_delivery IS E'Дата поставки';
 COMMENT ON COLUMN supplies.best_before IS E'Срок хранения в днях с даты поставки';
+
+COMMENT ON TABLE products_supplies IS E'Реестр поставок товаров';
+COMMENT ON COLUMN products_supplies.products_supplies_id IS E'ID записи';
+COMMENT ON COLUMN products_supplies.product_id IS E'ID товара';
+COMMENT ON COLUMN products_supplies.supply_id IS E'ID поставки';
+COMMENT ON COLUMN products_supplies.quantity IS E'Количество';
+COMMENT ON COLUMN products_supplies.capacity IS E'Объем товара, куб.м.';
+
+
 
 COMMENT ON TABLE products_stores IS E'Таблица мест хранения товаров';
 COMMENT ON COLUMN products_stores.product_store_id IS E'ID записи ';
 COMMENT ON COLUMN products_stores.product_id IS E'ID товара';
 COMMENT ON COLUMN products_stores.store_id IS E'Идентификатор склада';
+COMMENT ON COLUMN products_stores.quantity IS E'Количество';
+
+COMMENT ON TABLE products_orders IS E'Реестр товаров в закзазах';
+COMMENT ON COLUMN products_orders.product_order_id IS E'ID записи ';
+COMMENT ON COLUMN products_orders.product_id IS E'ID товара';
+COMMENT ON COLUMN products_orders.order_id IS E'Идентификатор склада';
+COMMENT ON COLUMN products_orders.quantity IS E'Количество';
+
 
 COMMENT ON TABLE supplies_history IS E'История поставок Товаров';
 COMMENT ON COLUMN supplies_history.supplies_history_id IS E'ID записи о поставке товара';
@@ -97,9 +112,8 @@ COMMENT ON COLUMN sources_sale.source_id IS E'ID источника продаж
 COMMENT ON COLUMN sources_sale.source_sale_name IS E'Наименование источника продаж';
 
 COMMENT ON TABLE orders IS E'Заказы';
-COMMENT ON COLUMN orders.orders_id IS E'ID заказа';
-COMMENT ON COLUMN orders.customers_id IS E'Идентификатор клиента';
-COMMENT ON COLUMN orders.product_id IS E'Идентификатор товара';
+COMMENT ON COLUMN orders.order_id IS E'ID заказа';
+COMMENT ON COLUMN orders.customer_id IS E'Идентификатор клиента';
 COMMENT ON COLUMN orders.quantity IS E'Количество единиц товара';
 COMMENT ON COLUMN orders.amount IS E'Сумма заказа, включая стоимость доставки';
 COMMENT ON COLUMN orders.staff_id IS E'Идентификатор сотрудника ответственного за заказ';
@@ -114,7 +128,7 @@ COMMENT ON COLUMN orders.store_id IS E'Идентификатор склада �
 COMMENT ON TABLE orders_history IS E'Заказы история';
 COMMENT ON COLUMN orders_history.orders_history_id IS E'Идентификатор записи в истории заказаов';
 COMMENT ON COLUMN orders_history.orders_id IS E'ID заказа';
-COMMENT ON COLUMN orders_history.customers_id IS E'Идентификатор клиента';
+COMMENT ON COLUMN orders_history.customer_id IS E'Идентификатор клиента';
 COMMENT ON COLUMN orders_history.product_id IS E'Идентификатор товара';
 COMMENT ON COLUMN orders_history.quantity IS E'Количество единиц товара';
 COMMENT ON COLUMN orders_history.amount IS E'Сумма заказа, включая стоимость доставки';
