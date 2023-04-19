@@ -82,6 +82,9 @@ create table supplies (
 	created timestamp default current_timestamp
 );
 
+--=== Замечание 20230418 (2)
+--- аналогично в таблице поставок, может быть поставлено несколько товаров в одной поставке одним поставщиком
+--- Исправил - добавил таблицу связей Товары в Поставках
 -- drop table if exists  cascade;
 create table products_supplies (
 	products_supplies_id int4 primary key,
@@ -93,7 +96,7 @@ create table products_supplies (
 
 -- drop table if exists cities cascade;
 create table if not exists products_stores (
-  	product_store_id int4 primary key,
+  product_store_id int4 primary key,
 	product_id int4 not null,
 	store_id int4 not null,
     quantity int4 default 0	
@@ -125,7 +128,9 @@ create table orders (
 	store_id int4,
 	created timestamp default current_timestamp
 );
-
+--=== Замечание 20230418 (1)
+--- к одному заказу может относиться несколько товаров, в таблице orders сейчас не учтен этот момент
+--- Исправил - добавил таблицу связей Заказы-Товары
 -- drop table if exists products_orders cascade;
 create table products_orders (
   product_order_id int4 primary key,
@@ -165,3 +170,7 @@ create table orders_history (
 	date_completion date,
 	created timestamp default current_timestamp
 );
+
+-- Несколько замечаний, что стоит еще доработать, чтобы структура отвечала на условия задания:
+--- к одному заказу может относиться несколько товаров, в таблице orders сейчас не учтен этот момент
+--- аналогично в таблице поставок, может быть поставлено несколько товаров в одной поставке одним поставщиком
