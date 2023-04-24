@@ -6,5 +6,5 @@
 4. [Основы проектирования](src/part4.1/readme.md)
 5. [PostgreSQL extensions](src/part5.1/readme.md)
 6. Масштабирование
-8. Интеграция
-9. Итоговый проект
+7. Интеграция
+8. [Итоговый проект](src/partFinal/readme.md)
